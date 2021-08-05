@@ -1,0 +1,154 @@
+﻿@page "/Player"
+<div class="card accordion">
+        <div class="card-header" style="background-color: #90C2E7;">
+            <h1 style="color:black; text-align: center; font-family: 'Times New Roman'; font-style: italic;">Mejores Tiempos</h1>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col form-group">
+                    <select class="form-control ml-3 w-1" @bind-value="IndexConsulta" @bind-value:event="oninput">
+                        <option value="-1" disabled>Filtrar por...</option>
+                        <option value="0">Todos</option>
+                        <option value="1">Jugador</option>
+                        <option value="2">Dificultad</option>
+                        <option value="3">Modo de Juego</option>
+                    </select>
+                </div>
+
+                <div class="col form-group">
+                    <div class="input-group">
+                        <input class="form-control" @bind-value="CriterioTextBox" @bind-value:event="oninput" placeholder="Criterio" />
+                        @if (CriterioTextBox != null)
+                        {
+                            CargarConsulta();
+                            if (IndexConsulta != -1)
+                            {
+                                CriterioTextBox = string.Empty;
+                            }
+                        }
+                    </div>
+                </div>
+
+            </div>
+
+            @if (ListaJugadores == null)
+            {
+    <div class="form-group">
+        <h2>No existen jugadores en la base de datos</h2>
+    </div> }
+                else
+                {
+    <div class="form-group">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Jugador</th>
+                    <th>Tiempo</th>
+                    <th>Dificultad</th>
+                    <th>Modo de Juego</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Models.MatchDino item in jugadas)
+                {
+                    i++;
+                    <tr>
+                        <td>@i</td>
+                        <td>@item.Jugador</td>
+                        <td>@item.TiempoJugada</td>
+                        <td>@item.Dificultad</td>
+                        <td>@item.ModoDeJuego</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>}
+        </div>
+    </div>
+
+
+@code {
+    public int indice = -1;
+    public string Criterio = string.Empty;
+    List<Usuarios> ListaJugadores = new List<Usuarios>();
+    string CriterioTextBox = string.Empty;
+    int i = 0;
+
+    private List<MatchDino> jugadas = new List<MatchDino>();
+
+    int IndexConsulta = -1;
+    public List<MatchDino> Filtro { get; set; }
+
+    protected override void OnInitialized()
+    {
+        jugadas = new List<MatchDino>();
+
+        CargarConsulta();
+    }
+
+    private void CargarConsulta()
+    {
+        if (IndexConsulta == -1 || IndexConsulta == 0)
+        {
+            jugadas = MatchDinoBLL.GetList(r => true);
+        }
+        else
+        {
+            if (IndexConsulta == 1)
+            {
+                jugadas = MatchDinoBLL.GetList(p => p.Jugador.ToLower().Contains(CriterioTextBox.ToLower())).ToList();
+            }
+            else if (IndexConsulta == 2)
+            {
+                jugadas = MatchDinoBLL.GetList(p => p.Dificultad.ToLower().Contains(CriterioTextBox.ToLower())).ToList();
+            }
+            else if (IndexConsulta == 3)
+            {
+                jugadas = MatchDinoBLL.GetList(p => p.ModoDeJuego.ToLower().Contains(CriterioTextBox.ToLower())).ToList();
+            }
+        }
+        jugadas = jugadas.OrderBy(j => j.TiempoJugada).ToList();
+    }
+
+    @*public void Actualizar()
+        {
+            ListaJugadores = UsuariosBLL.GetList(e => true);
+        }
+
+        void Buscar()
+        {
+            if (indice == 0)
+            {
+                ListaJugadores = UsuariosBLL.GetList(p => true).ToList();
+            }
+            else if (indice == 1)
+            {
+                int IdJugadores = int.Parse(Criterio);
+                ListaJugadores = UsuariosBLL.GetList(p => p.UsuarioId == IdJugadores).ToList();
+
+            }
+            else if (indice == 2)
+            {
+                ListaJugadores = UsuariosBLL.GetList(p => p.NombreDeUsuario.Contains(Criterio)).ToList();
+            }
+
+        }
+
+        private void Eliminar(int id)
+        {
+            bool Paso;
+
+
+            Paso = UsuariosBLL.Eliminar(id);
+
+            if (Paso)
+            {
+                Actualizar();
+            }
+            return;
+        }*@
+}
+
